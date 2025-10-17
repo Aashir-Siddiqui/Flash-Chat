@@ -4,8 +4,9 @@ import Chat from "./pages/chat";
 import Profile from "./pages/profile";
 import { useAppStore } from "./store";
 import { useEffect, useState } from "react";
-import { apiClient } from "./lib/api-client";
-import { GET_USER_INFO } from "./utils/constant";
+import { apiClient } from "./lib/api-client.js";
+import { GET_USER_INFO } from "./utils/constant.js";
+import { AxiosError } from "axios";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -26,16 +27,36 @@ function App() {
   useEffect(() => {
     const getUserData = async () => {
       try {
+        // Line 29: GET http://localhost:3000/api/auth/userInfo
         const response = await apiClient.get(GET_USER_INFO, {
           withCredentials: true,
         });
-        console.log("User info response:", response);
+        if (response.status === 200 && response.data.id) {
+          setUserInfo(response.data);
+        } else {
+          setUserInfo(undefined);
+        }
+        // console.log("User info response:", response); // Console log hata sakte hain
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        // FIX: Unauthorized errors ko console mein log karne se rokna
+        if (
+          error instanceof AxiosError &&
+          (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+          // Expected behavior: User is not logged in, server returned unauthorized.
+          console.log(
+            "Initial auth check: User not logged in (Status 401/403 handled gracefully)."
+          );
+        } else {
+          // Baaki serious errors ko log karo
+          console.error("Error fetching user info:", error);
+        }
+      } finally {
+        setLoading(false);
       }
     };
     if (!userInfo) {
-      getUserData().finally(() => setLoading(false));
+      getUserData(); // .finally() ki zarurat nahi, finally block function ke andar hai.
     } else {
       setLoading(false);
     }
@@ -44,7 +65,7 @@ function App() {
   if (loading) {
     return <div>Loading...</div>;
   }
-
+  // ... existing return statement
   return (
     <BrowserRouter>
       <Routes>
@@ -72,7 +93,10 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/auth" />} />
+        <Route
+          path="*"
+          element={<Navigate to={userInfo ? "/chat" : "/auth"} />}
+        />
       </Routes>
     </BrowserRouter>
   );

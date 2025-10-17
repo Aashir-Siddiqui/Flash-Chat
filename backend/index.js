@@ -19,10 +19,12 @@ app.use(
   })
 );
 
+app.use("/uploads/profiles", express.static("uploads/profiles"));
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api/auth", authRoutes)
+app.use("/api/auth", authRoutes);
 
 mongoose
   .connect(databaseURL, {})
