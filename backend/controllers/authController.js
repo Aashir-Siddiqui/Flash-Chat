@@ -200,3 +200,13 @@ export const removeProfileImage = async (req, res) => {
     res.status(500).json({ msg: "Internal server error" });
   }
 };
+
+export const logOut = (req, res) => {
+  try {
+    res.cookie("jwt", "", {maxAge:1, secure:true, sameSite:"None"})
+    return res.status(200).send("Logout Successfully.")
+  } catch (error) {
+    console.log("Error removing profile image:", error);
+    res.status(500).json({ msg: "Internal server error" });
+  }
+};

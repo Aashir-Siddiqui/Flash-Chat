@@ -14,6 +14,7 @@ import {
   UPDATE_PROFILE_ROUTE,
   REMOVE_PROFILE_IMAGE,
 } from "@/utils/constant.js";
+import { colors, getColor } from "@/lib/utils"; // ✅ Import colors and getColor
 
 function Profile() {
   const navigate = useNavigate();
@@ -26,32 +27,21 @@ function Profile() {
   const [selectedColor, setSelectedColor] = useState(userInfo?.color || 0);
   const fileInputRef = useRef(null);
 
-  const colors = [
-    { id: 0, class: "bg-green-500", hex: "#22C55E" },
-    { id: 1, class: "bg-blue-500", hex: "#3B82F6" },
-    { id: 2, class: "bg-yellow-500", hex: "#F59E0B" },
-    { id: 3, class: "bg-purple-500", hex: "#A855F7" },
-    { id: 4, class: "bg-pink-500", hex: "#EC4899" },
-    { id: 5, class: "bg-red-500", hex: "#EF4444" },
-    { id: 6, class: "bg-indigo-500", hex: "#6366F1" },
-    { id: 7, class: "bg-teal-500", hex: "#14B8A6" },
-  ];
-
   useEffect(() => {
     if (userInfo.profileSetup) {
       setFirstName(userInfo.firstName);
       setLastName(userInfo.lastName);
       setSelectedColor(userInfo.color);
     }
-    // FIX: Correct property name is "picture" not "image"
     if (userInfo.picture) {
       setImage(`${Host}/${userInfo.picture}`);
     }
   }, [userInfo]);
 
-  const currentColor = colors.find((c) => c.id === selectedColor) || colors[0];
+  // ✅ getColor function use karke color hex milega
+  const currentColorHex = getColor(selectedColor);
   const headerStyle = {
-    backgroundColor: currentColor.hex,
+    backgroundColor: currentColorHex,
   };
 
   const getAvatarFallback = () => {
@@ -112,15 +102,12 @@ function Profile() {
         const formData = new FormData();
         formData.append("profile-image", file);
 
-        // FIX: response spelling typo fixed
         const response = await apiClient.post(ADD_PROFILE_IMAGE, formData, {
           withCredentials: true,
         });
 
         if (response.status === 200 && response.data) {
-          // FIX: Update userInfo with picture, not image
           setUserInfo({ ...userInfo, picture: response.data.picture });
-          // FIX: Set image with Host URL
           setImage(`${Host}/${response.data.picture}`);
           toast.success("Image updated successfully.");
         }
@@ -216,18 +203,18 @@ function Profile() {
                 ) : (
                   <PlusCircle className="w-6 h-6 text-white" />
                 )}
+
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".png, .jpg, .jpeg, .webp"
+                  className="hidden"
+                  name="profile-image"
+                  onChange={handleImageChange}
+                />
               </div>
             </div>
-
-            {/* Hidden File Input */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept=".png, .jpg, .jpeg, .webp"
-              className="hidden"
-              name="profile-image"
-              onChange={handleImageChange}
-            />
 
             <p className="text-gray-600 font-medium">Set Your Avatar</p>
           </div>
@@ -242,7 +229,7 @@ function Profile() {
                 disabled
                 value={userInfo.email || ""}
                 className="focus-visible:ring-offset-0 focus-visible:ring-2"
-                style={{ "--tw-ring-color": currentColor.hex }}
+                style={{ "--tw-ring-color": currentColorHex }}
               />
             </div>
             <div className="space-y-2">
@@ -254,7 +241,7 @@ function Profile() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 className="focus-visible:ring-offset-0 focus-visible:ring-2"
-                style={{ "--tw-ring-color": currentColor.hex }}
+                style={{ "--tw-ring-color": currentColorHex }}
               />
             </div>
             <div className="space-y-2">
@@ -266,7 +253,7 @@ function Profile() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="focus-visible:ring-offset-0 focus-visible:ring-2"
-                style={{ "--tw-ring-color": currentColor.hex }}
+                style={{ "--tw-ring-color": currentColorHex }}
               />
             </div>
           </div>
@@ -299,7 +286,7 @@ function Profile() {
 
           <Button
             onClick={handleProfileUpdate}
-            style={{ backgroundColor: currentColor.hex }}
+            style={{ backgroundColor: currentColorHex }}
             className={`w-full py-6 text-lg font-semibold text-white transition-colors duration-300 hover:opacity-90 shadow-lg`}
           >
             {userInfo.profileSetup ? "Update Profile" : "Complete Setup"}

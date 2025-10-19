@@ -1,32 +1,54 @@
-import Logo from "@/Logo";
+import Logo from "../../../../components/ui/Logo";
 import React from "react";
+import { Users, Hash } from "lucide-react";
+import ProfileInfo from "./components/profile-info";
+import NewDM from "./components/new-dm";
 
 function ContactsContainer() {
   return (
-    <div className="relative md:w-[35vw] lg:w-[30vw] xl:w-[20vw] w-full bg-[#1b1c24] border-r-2 border-teal-200">
-      <div className="pt-3">
+    <div className="relative md:w-[35vw] lg:w-[30vw] xl:w-[20vw] w-full bg-[#1b1c24] border-r-2 border-[#2f303b] flex flex-col h-screen">
+      {/* Logo Section */}
+      <div className="pt-5 px-5 border-b-2 border-[#2f303b]">
         <Logo />
       </div>
-      <div className="my-5">
-        <div className="flex justify-between pr-10 items-center">
-          <Title text="Direct Messages" />
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[#2f303b] scrollbar-track-transparent">
+        {/* Direct Messages Section */}
+        <div className="my-6">
+          <div className="flex justify-between items-center px-5 mb-3">
+            <Title text="Direct Messages" icon={<Users size={16} />} />
+            <NewDM />
+          </div>
+        </div>
+
+        {/* Channels Section */}
+        <div className="my-6">
+          <div className="flex justify-between items-center px-5 mb-3">
+            <Title text="Channels" icon={<Hash size={16} />} />
+          </div>
+          <div className="space-y-1 px-3">
+            {/* Placeholder for channels */}
+            <div className="text-center py-8 text-gray-500 text-sm">
+              No channels yet
+            </div>
+          </div>
         </div>
       </div>
-      <div className="my-5">
-        <div className="flex justify-between pr-10 items-center">
-          <Title text="Channels" />
-        </div>
-      </div>
+      <ProfileInfo />
     </div>
   );
 }
 
 export default ContactsContainer;
 
-const Title = ({ text }) => {
+const Title = ({ text, icon }) => {
   return (
-    <h6 className="uppercase tracking-widest font-light text-neutral-400 text-opacity-90 pl-10 text-sm">
-      {text}
-    </h6>
+    <div className="flex items-center gap-2">
+      <span className="text-neutral-400">{icon}</span>
+      <h6 className="uppercase tracking-widest font-semibold text-neutral-400 text-xs">
+        {text}
+      </h6>
+    </div>
   );
 };

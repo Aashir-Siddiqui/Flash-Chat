@@ -8,21 +8,16 @@ import { useAppStore } from "@/store";
 
 // Custom, self-contained Auth component using internal state for tabs
 const Auth = () => {
-  const { setUserInfo } = useAppStore();
+  const { userInfo, setUserInfo } = useAppStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("login");
 
   // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const validateSignup = () => {
-    if (!username.length) {
-      toast.error("Username is required");
-      return false;
-    }
     if (!email.length) {
       toast.error("Email is required");
       return false;
@@ -209,22 +204,6 @@ const Auth = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
       <div className="space-y-4">
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700 mb-1"
-            htmlFor="username"
-          >
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition duration-150"
-            placeholder="Your Name"
-          />
-        </div>
         <div>
           <label
             className="block text-sm font-medium text-gray-700 mb-1"

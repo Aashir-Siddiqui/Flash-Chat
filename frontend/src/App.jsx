@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { apiClient } from "./lib/api-client.js";
 import { GET_USER_INFO } from "./utils/constant.js";
 import { AxiosError } from "axios";
+import Loader from "./components/ui/loader";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -27,7 +28,6 @@ function App() {
   useEffect(() => {
     const getUserData = async () => {
       try {
-        // Line 29: GET http://localhost:3000/api/auth/userInfo
         const response = await apiClient.get(GET_USER_INFO, {
           withCredentials: true,
         });
@@ -36,36 +36,38 @@ function App() {
         } else {
           setUserInfo(undefined);
         }
-        // console.log("User info response:", response); // Console log hata sakte hain
       } catch (error) {
-        // FIX: Unauthorized errors ko console mein log karne se rokna
         if (
           error instanceof AxiosError &&
           (error.response?.status === 401 || error.response?.status === 403)
         ) {
-          // Expected behavior: User is not logged in, server returned unauthorized.
           console.log(
             "Initial auth check: User not logged in (Status 401/403 handled gracefully)."
           );
         } else {
-          // Baaki serious errors ko log karo
           console.error("Error fetching user info:", error);
         }
       } finally {
         setLoading(false);
       }
     };
+
     if (!userInfo) {
-      getUserData(); // .finally() ki zarurat nahi, finally block function ke andar hai.
+      getUserData();
     } else {
       setLoading(false);
     }
   }, [userInfo, setUserInfo]);
 
+  // FIX: Return statement missing tha
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex flex-col h-screen w-screen items-center justify-center bg-[#1c1d25]">
+        <Loader />
+      </div>
+    );
   }
-  // ... existing return statement
+
   return (
     <BrowserRouter>
       <Routes>
