@@ -18,7 +18,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { apiClient } from "@/lib/api-client";
 import { SEARCH_CONTACT_ROUTES, Host } from "@/utils/constant";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getColor } from "@/lib/utils"; // ✅ Import getColor function
+import { getColor } from "@/lib/utils";
 import { useAppStore } from "@/store";
 
 function NewDM() {
@@ -69,16 +69,13 @@ function NewDM() {
       </Tooltip>
 
       <Dialog open={openNewModal} onOpenChange={setOpenNewModal}>
-        <DialogContent
-          className="bg-[#1b1c24] border-2 border-[#2f303b] text-white max-w-[95vw] sm:max-w-md rounded-2xl p-0 overflow-hidden"
-          hideClose
-        >
+        <DialogContent className="bg-[#1b1c24] border-2 border-[#2f303b] text-white max-w-[95vw] sm:max-w-md rounded-2xl p-0 overflow-hidden">
           {/* Header */}
           <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 bg-gradient-to-r from-[#1e1f28] to-[#1b1c24] border-b border-[#2f303b]">
-            <DialogTitle className="text-lg sm:text-xl font-bold text-white">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-white text-start">
               New Message
             </DialogTitle>
-            <DialogDescription className="text-gray-400 text-xs sm:text-sm mt-1">
+            <DialogDescription className="text-gray-400 text-xs sm:text-sm mt-1 text-start">
               Search and select a contact to start chatting
             </DialogDescription>
           </DialogHeader>
@@ -131,7 +128,7 @@ function NewDM() {
                     </div>
 
                     {/* Contact Info */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 max-w-[200px] md:max-w-[260px] overflow-hidden">
                       <p className="text-white font-semibold text-sm truncate">
                         {contact.firstName && contact.lastName
                           ? `${contact.firstName} ${contact.lastName}`

@@ -3,13 +3,16 @@ import { Send, Paperclip, Smile, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EmojiPicker from "emoji-picker-react";
+import { useAppStore } from "@/store";
+import { useSocket } from "@/context/socketContext";
 
 function MessageBar() {
   const emojiRef = useRef();
   const [message, setMessage] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+  const socket = useSocket();
 
-  // Close emoji picker when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (emojiRef.current && !emojiRef.current.contains(event.target)) {
@@ -24,9 +27,23 @@ function MessageBar() {
     setMessage((msg) => msg + emoji.emoji);
   };
 
-  const handleSend = () => {
-    if (message.trim()) {
-      console.log("Sending message:", message);
+  const handleSend = async () => {
+    if (message.trim() && socket) {
+      if (selectedChatType === "contact") {
+        console.log("Sending message:", {
+          sender: userInfo.id,
+          recipient: selectedChatData._id,
+          content: message,
+        });
+
+        socket.emit("sendMessage", {
+          sender: userInfo.id,
+          content: message,
+          recipient: selectedChatData._id,
+          messageType: "text",
+          fileUrl: undefined,
+        });
+      }
       setMessage("");
     }
   };
@@ -39,8 +56,7 @@ function MessageBar() {
   };
 
   return (
-    <div className="h-[80px] bg-[#1b1c24] border-t-2 border-[#2f303b] px-3 sm:px-6 flex items-center gap-2 sm:gap-4">
-      {/* Attachment Button */}
+    <div className="h-[82px] bg-[#1b1c24] border-t-2 border-[#2f303b] px-3 sm:px-6 flex items-center gap-2 sm:gap-4">
       <Button
         variant="ghost"
         size="icon"
@@ -49,7 +65,6 @@ function MessageBar() {
         <Paperclip size={20} className="sm:w-[22px] sm:h-[22px]" />
       </Button>
 
-      {/* Message Input with Emoji */}
       <div className="flex-1 relative">
         <Input
           type="text"
@@ -60,7 +75,6 @@ function MessageBar() {
           className="w-full bg-[#2a2b33] border-none text-white placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-teal-500 rounded-full px-4 sm:px-5 py-5 sm:py-6 pr-12"
         />
 
-        {/* Emoji Button */}
         <Button
           variant="ghost"
           size="icon"
@@ -70,15 +84,12 @@ function MessageBar() {
           <Smile size={20} />
         </Button>
 
-        {/* Emoji Picker - Above Emoji Icon */}
         {emojiPickerOpen && (
           <div
             ref={emojiRef}
             className="absolute bottom-14 -right-3 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200"
           >
-            {/* Stylish Card Wrapper with Close Button */}
             <div className="relative bg-[#1e1f28] rounded-2xl shadow-2xl border border-[#2f303b] overflow-hidden">
-              {/* Close Button - Always Visible */}
               <div className="absolute top-2 right-3 z-10">
                 <Button
                   size="icon"
@@ -89,7 +100,6 @@ function MessageBar() {
                 </Button>
               </div>
 
-              {/* Header */}
               <div className="px-4 py-3 bg-gradient-to-r from-[#2a2b33] to-[#1e1f28] border-b border-[#2f303b]">
                 <h3 className="text-white font-semibold text-sm flex items-center gap-2">
                   <Smile size={16} className="text-yellow-400" />
@@ -97,7 +107,6 @@ function MessageBar() {
                 </h3>
               </div>
 
-              {/* Emoji Picker */}
               <EmojiPicker
                 theme="dark"
                 onEmojiClick={handleEmoji}
@@ -110,13 +119,11 @@ function MessageBar() {
               />
             </div>
 
-            {/* Pointer Arrow */}
             <div className="absolute -bottom-2 right-8 w-4 h-4 bg-[#1e1f28] border-r border-b border-[#2f303b] transform rotate-45"></div>
           </div>
         )}
       </div>
 
-      {/* Send Button */}
       <Button
         onClick={handleSend}
         disabled={!message.trim()}
@@ -125,7 +132,6 @@ function MessageBar() {
         <Send size={18} className="sm:w-[20px] sm:h-[20px]" />
       </Button>
 
-      {/* Backdrop for mobile when emoji picker is open */}
       {emojiPickerOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 sm:hidden"

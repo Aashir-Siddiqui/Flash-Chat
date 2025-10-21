@@ -77,7 +77,7 @@ function ProfileInfo() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-white hover:bg-[#2f303b] rounded-full w-9 h-9"
+            className="text-gray-400 hover:text-white cursor-pointer hover:bg-[#2f303b] rounded-full w-9 h-9"
             onClick={() => navigate("/profile")}
             title="Edit Profile"
           >
@@ -86,7 +86,7 @@ function ProfileInfo() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-red-400 hover:bg-[#2f303b] rounded-full w-9 h-9"
+            className="text-gray-400 cursor-pointer hover:text-red-500 hover:bg-[#2f303b] rounded-full w-9 h-9"
             title="Logout"
             onClick={logout}
           >
