@@ -44,11 +44,8 @@ function ChatHeader() {
           </h3>
         </div>
       </div>
-
-      {/* Right: Action Buttons (Fixed positioning removed to keep it inside ChatHeader) */}
+      
       <div className="flex-shrink-0">
-        {" "}
-        {/* 👈 Position the button correctly */}
         <Button
           variant="ghost"
           size="icon"

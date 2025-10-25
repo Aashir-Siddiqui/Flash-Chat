@@ -35,6 +35,7 @@ app.use(
 );
 
 app.use("/uploads/profiles", express.static("uploads/profiles"));
+app.use("/uploads/files", express.static("uploads/files"));
 
 app.use(express.json());
 app.use(cookieParser());
@@ -42,7 +43,7 @@ app.use(cookieParser());
 // --- ROUTES ---
 app.use("/api/auth", authRoutes);
 app.use("/api/contacts", contactsRoutes);
-app.use("/api/messages", messagesRoutes)
+app.use("/api/messages", messagesRoutes);
 
 // --- SERVER START ---
 const server = app.listen(PORT, () => {

@@ -6,14 +6,14 @@ export function cn(...inputs) {
 }
 
 export const colors = [
-  { id: 0, class: "bg-green-500", hex: "#22C55E" },
-  { id: 1, class: "bg-blue-500", hex: "#3B82F6" },
-  { id: 2, class: "bg-yellow-500", hex: "#F59E0B" },
-  { id: 3, class: "bg-purple-500", hex: "#A855F7" },
-  { id: 4, class: "bg-pink-500", hex: "#EC4899" },
-  { id: 5, class: "bg-red-500", hex: "#EF4444" },
-  { id: 6, class: "bg-indigo-500", hex: "#6366F1" },
-  { id: 7, class: "bg-teal-500", hex: "#14B8A6" },
+  { id: 0, class: "bg-teal-500", hex: "#14B8A6" }, // ✅ Main app color
+  { id: 1, class: "bg-cyan-500", hex: "#06B6D4" }, // 🔵 Cool blue-green
+  { id: 2, class: "bg-indigo-500", hex: "#6366F1" }, // 🔵 Deep blue
+  { id: 3, class: "bg-violet-500", hex: "#8B5CF6" }, // 🟣 Rich purple
+  { id: 4, class: "bg-fuchsia-500", hex: "#D946EF" }, // 🟣 Bright magenta
+  { id: 5, class: "bg-rose-500", hex: "#F43F5E" }, // 🔴 Modern red
+  { id: 6, class: "bg-orange-500", hex: "#F97316" }, // 🟠 Warm orange
+  { id: 7, class: "bg-amber-500", hex: "#F59E0B" }, // 🟡 Golden yellow
 ];
 
 // ✅ Color ID se hex value return karta hai

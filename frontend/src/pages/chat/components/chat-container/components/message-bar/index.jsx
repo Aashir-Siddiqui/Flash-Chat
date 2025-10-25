@@ -5,12 +5,21 @@ import { Input } from "@/components/ui/input";
 import EmojiPicker from "emoji-picker-react";
 import { useAppStore } from "@/store";
 import { useSocket } from "@/context/socketContext";
+import { apiClient } from "@/lib/api-client";
+import { UPLOAD_FILE_ROUTE } from "@/utils/constant";
 
 function MessageBar() {
   const emojiRef = useRef();
+  const inputFileRef = useRef();
   const [message, setMessage] = useState("");
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+  const {
+    selectedChatType,
+    selectedChatData,
+    userInfo,
+    setIsUploading,
+    setFileUploadingProgress,
+  } = useAppStore();
   const socket = useSocket();
 
   useEffect(() => {
@@ -55,13 +64,60 @@ function MessageBar() {
     }
   };
 
+  const handleAttachmentClick = () => {
+    if (inputFileRef.current) {
+      inputFileRef.current.click();
+    }
+  };
+
+  const handleAttachmentChange = async (event) => {
+    try {
+      const file = event.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        setIsUploading(true);
+        const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
+          withCredentials: true,
+          onUploadProgress: (data) => {
+            setFileUploadingProgress(
+              Math.round((100 * data.loaded) / data.total)
+            );
+          },
+        });
+        if (response.status === 200 && response.data) {
+          setIsUploading(false);
+          if (selectedChatType == "contact") {
+            socket.emit("sendMessage", {
+              sender: userInfo.id,
+              content: undefined,
+              recipient: selectedChatData._id,
+              messageType: "file",
+              fileUrl: response.data.filePath,
+            });
+          }
+        }
+      }
+      console.log({ file });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="h-[82px] bg-[#1b1c24] border-t-2 border-[#2f303b] px-3 sm:px-6 flex items-center gap-2 sm:gap-4">
       <Button
         variant="ghost"
         size="icon"
         className="text-gray-400 hover:text-teal-400 hover:bg-[#2f303b] rounded-full flex-shrink-0"
+        onClick={handleAttachmentClick}
       >
+        <input
+          type="file"
+          className="hidden"
+          ref={inputFileRef}
+          onChange={handleAttachmentChange}
+        />
         <Paperclip size={20} className="sm:w-[22px] sm:h-[22px]" />
       </Button>
 

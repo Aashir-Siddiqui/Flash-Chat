@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { apiClient } from "./lib/api-client.js";
 import { GET_USER_INFO } from "./utils/constant.js";
 import { AxiosError } from "axios";
-import Loader from "./components/ui/loader";
+import Loader from "./components/loader";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();

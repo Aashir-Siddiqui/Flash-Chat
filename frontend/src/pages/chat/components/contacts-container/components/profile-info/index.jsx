@@ -6,13 +6,12 @@ import { UserPen, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "@/lib/api-client";
-import { getColor } from "@/lib/utils"; // ✅ Import getColor function
+import { getColor } from "@/lib/utils";
 
 function ProfileInfo() {
   const { userInfo, setUserInfo } = useAppStore();
   const navigate = useNavigate();
 
-  // ✅ getColor function use karke color hex milega
   const avatarColor = getColor(userInfo?.color || 0);
 
   const getAvatarFallback = () => {
@@ -41,7 +40,6 @@ function ProfileInfo() {
   return (
     <div className="absolute bottom-0 w-full border-t-2 border-[#2f303b] bg-[#16171d]">
       <div className="p-4 flex items-center justify-between gap-3">
-        {/* Left: Avatar + User Info */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <Avatar className="w-12 h-12 ring-2 ring-[#2f303b]">
             {userInfo.picture ? (
@@ -72,7 +70,6 @@ function ProfileInfo() {
           </div>
         </div>
 
-        {/* Right: Action Buttons */}
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
