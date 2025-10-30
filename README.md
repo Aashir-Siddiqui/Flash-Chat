@@ -49,8 +49,8 @@ File Uploads: Multer
 
 ![Profile](./screenshots/profile.png)
 
-💌 NoChat Conversation
-[NoChat](./screenshots/chat.png)
+💌 Chat Conversation
+[Chat](./screenshots/chat.png)
 
 📭 Empty Chat / No Active Conversation
 
