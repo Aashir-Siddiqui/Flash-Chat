@@ -59,7 +59,6 @@ function App() {
     }
   }, [userInfo, setUserInfo]);
 
-  // FIX: Return statement missing tha
   if (loading) {
     return (
       <div className="flex flex-col h-screen w-screen items-center justify-center bg-[#1c1d25]">

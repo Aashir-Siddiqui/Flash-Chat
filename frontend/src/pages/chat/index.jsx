@@ -27,11 +27,9 @@ function Chat() {
 
   return (
     <div className="flex h-[100vh] text-white overflow-hidden">
-      {/* Upload Progress Overlay */}
       {isUploading && (
         <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-[#1e1f28] rounded-3xl shadow-2xl border border-[#2f303b] p-8 max-w-md w-full mx-4">
-            {/* Icon */}
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-teal-500/20 flex items-center justify-center">
@@ -41,7 +39,6 @@ function Chat() {
               </div>
             </div>
 
-            {/* Title */}
             <h3 className="text-2xl font-bold text-white text-center mb-2">
               Uploading File
             </h3>
@@ -49,7 +46,6 @@ function Chat() {
               Please wait while we upload your file...
             </p>
 
-            {/* Progress Bar */}
             <div className="relative">
               <div className="h-3 bg-[#2a2b33] rounded-full overflow-hidden">
                 <div
@@ -60,7 +56,6 @@ function Chat() {
                 </div>
               </div>
 
-              {/* Percentage */}
               <div className="flex justify-between items-center mt-3">
                 <span className="text-gray-400 text-sm font-medium">
                   Progress
@@ -71,7 +66,6 @@ function Chat() {
               </div>
             </div>
 
-            {/* Loading Dots */}
             <div className="flex justify-center gap-2 mt-6">
               <div
                 className="w-2 h-2 bg-teal-400 rounded-full animate-bounce"
@@ -90,11 +84,9 @@ function Chat() {
         </div>
       )}
 
-      {/* Download Progress Overlay */}
       {isDownloading && (
         <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-[#1e1f28] rounded-3xl shadow-2xl border border-[#2f303b] p-8 max-w-md w-full mx-4">
-            {/* Icon */}
             <div className="flex justify-center mb-6">
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -104,7 +96,6 @@ function Chat() {
               </div>
             </div>
 
-            {/* Title */}
             <h3 className="text-2xl font-bold text-white text-center mb-2">
               Downloading File
             </h3>
@@ -112,7 +103,6 @@ function Chat() {
               Your file is being downloaded...
             </p>
 
-            {/* Progress Bar */}
             <div className="relative">
               <div className="h-3 bg-[#2a2b33] rounded-full overflow-hidden">
                 <div
@@ -123,7 +113,6 @@ function Chat() {
                 </div>
               </div>
 
-              {/* Percentage */}
               <div className="flex justify-between items-center mt-3">
                 <span className="text-gray-400 text-sm font-medium">
                   Progress
@@ -134,7 +123,6 @@ function Chat() {
               </div>
             </div>
 
-            {/* Loading Spinner */}
             <div className="flex justify-center mt-6">
               <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
             </div>

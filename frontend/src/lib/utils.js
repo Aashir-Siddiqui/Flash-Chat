@@ -16,7 +16,6 @@ export const colors = [
   { id: 7, class: "bg-amber-500", hex: "#F59E0B" }, // 🟡 Golden yellow
 ];
 
-// ✅ Color ID se hex value return karta hai
 export const getColor = (colorId) => {
   const color = colors.find((c) => c.id === colorId);
   return color ? color.hex : colors[0].hex;

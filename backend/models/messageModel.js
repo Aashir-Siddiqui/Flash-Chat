@@ -9,7 +9,7 @@ const messageSchema = mongoose.Schema({
   recipient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
   },
   messageType: {
     type: String,
@@ -28,7 +28,6 @@ const messageSchema = mongoose.Schema({
       return this.messageType === "file";
     },
   },
-  // FIX: timeStamp -> timestamp (consistent naming)
   timestamp: {
     type: Date,
     default: Date.now,

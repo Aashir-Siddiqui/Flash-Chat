@@ -1,155 +1,181 @@
 import React, { useState } from "react";
-import { LogIn, UserPlus, Zap, CheckCircle } from "lucide-react";
+import {
+  LogIn,
+  UserPlus,
+  MessageCircle,
+  Shield,
+  Eye,
+  EyeOff,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client.js";
 import { LOGIN_ROUTE, SIGNUP_ROUTE } from "@/utils/constant.js";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "@/store";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
-// Custom, self-contained Auth component using internal state for tabs
 const Auth = () => {
-  const { userInfo, setUserInfo } = useAppStore();
+  const { setUserInfo } = useAppStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("login");
 
-  // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const getPasswordStrength = (pwd) => {
+    if (!pwd) return { strength: 0, label: "", color: "" };
+
+    let strength = 0;
+    if (pwd.length >= 8) strength++;
+    if (/[a-z]/.test(pwd)) strength++;
+    if (/[A-Z]/.test(pwd)) strength++;
+    if (/\d/.test(pwd)) strength++;
+    if (/[@$!%*?&]/.test(pwd)) strength++;
+
+    const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+    const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#10b981"];
+
+    return {
+      strength: (strength / 5) * 100,
+      label: labels[strength - 1] || "",
+      color: colors[strength - 1] || "#ef4444",
+    };
+  };
+
+  const passwordStrength = getPasswordStrength(password);
 
   const validateSignup = () => {
-    if (!email.length) {
+    if (!email.trim()) {
       toast.error("Email is required");
       return false;
     }
-    if (!password.length) {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please provide a valid email address");
+      return false;
+    }
+
+    if (!password) {
       toast.error("Password is required");
       return false;
     }
+
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return false;
+    }
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      toast.error(
+        "Password must contain uppercase, lowercase, number, and special character (@$!%*?&)"
+      );
+      return false;
+    }
+
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return false;
     }
+
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateSignup()) {
+    if (!validateSignup()) return;
+
+    setLoading(true);
+    try {
       const response = await apiClient.post(
         SIGNUP_ROUTE,
-        {
-          email,
-          password,
-        },
+        { email: email.toLowerCase().trim(), password },
         { withCredentials: true }
       );
+
       if (response.status === 201) {
         setUserInfo(response.data.user);
-        toast.success("Account created successfully!", {
-          icon: <CheckCircle className="h-5 w-5 text-white" />,
-          duration: 4000,
-          navigate: "/profile-setup",
-        });
-        navigate("/profile-setup");
+        toast.success("Account created successfully!");
+        navigate("/profile");
       }
-      console.log(response);
+    } catch (error) {
+      console.error("Signup error:", error);
+      const errorMsg = error.response?.data?.msg || "Failed to create account";
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
   const validateLogin = () => {
-    if (!email.length) {
+    if (!email.trim()) {
       toast.error("Email is required");
       return false;
     }
-    if (!password.length) {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please provide a valid email address");
+      return false;
+    }
+
+    if (!password) {
       toast.error("Password is required");
       return false;
     }
+
     return true;
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (validateLogin()) {
+    if (!validateLogin()) return;
+
+    setLoading(true);
+    try {
       const response = await apiClient.post(
         LOGIN_ROUTE,
-        {
-          email,
-          password,
-        },
+        { email: email.toLowerCase().trim(), password },
         { withCredentials: true }
       );
+
       if (response.data.user) {
         setUserInfo(response.data.user);
+        toast.success("Welcome back!");
+
         if (response.data.user.profileSetup) {
           navigate("/chat");
         } else {
           navigate("/profile");
         }
       }
-      console.log("Login", response);
+    } catch (error) {
+      console.error("Login error:", error);
+      const errorMsg = error.response?.data?.msg || "Invalid credentials";
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const ThemedAnimatedSVG = (
-    <svg
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-48 h-48 drop-shadow-lg animate-pulse-slow"
-    >
-      <style>
-        {`
-          /* Custom CSS Animation to mimic subtle Lottie movement */
-          @keyframes pulse-slow {
-            0%, 100% { transform: scale(1) translateY(0px); opacity: 0.9; }
-            50% { transform: scale(1.05) translateY(-5px); opacity: 1; }
-          }
-          .animate-pulse-slow {
-            animation: pulse-slow 6s infinite ease-in-out;
-          }
-        `}
-      </style>
-
-      {/* Main Shield Body (Emerald Dark) */}
-      <path
-        d="M50 0 L10 20 V50 C10 75 50 100 50 100 S90 75 90 50 V20 L50 0 Z"
-        fill="#047857"
-      />
-
-      {/* Shield Highlight/Trim (Teal/Emerald Light) */}
-      <path
-        d="M50 2 L12 21 V49 C12 73 50 97 50 97 S88 73 88 49 V21 L50 2 Z"
-        fill="#10B981"
-        opacity="0.8"
-      />
-
-      {/* Checkmark (White) */}
-      <path
-        d="M30 50 L45 65 L70 35"
-        stroke="#FFFFFF"
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Minimal Chat Icon Overlay */}
-      <path
-        d="M35 15 L65 15 Q75 15 75 25 L75 45 Q75 55 65 55 L50 55 L35 70 V55 Q25 55 25 45 L25 25 Q25 15 35 15 Z"
-        fill="#FFFFFF"
-        opacity="0.1"
-      />
-    </svg>
-  );
-
   const LoginForm = (
     <form onSubmit={handleLogin} className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Sign In</h2>
-      <div className="space-y-4">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+        <p className="text-gray-400">Sign in to continue chatting</p>
+      </div>
+
+      <div className="space-y-5">
         <div>
           <label
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-300 mb-2"
             htmlFor="email"
           >
             Email Address
@@ -159,174 +185,262 @@ const Auth = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 transition duration-150"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-[#2a2b33] border border-[#3d3e47] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all disabled:opacity-50"
             placeholder="you@example.com"
           />
         </div>
+
         <div>
           <label
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-300 mb-2"
             htmlFor="password"
           >
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-emerald-500 focus:border-emerald-500 transition duration-150"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-3 bg-[#2a2b33] border border-[#3d3e47] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all disabled:opacity-50 pr-12"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
         </div>
       </div>
+
       <button
         type="submit"
-        className="w-full py-3 px-4 bg-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:bg-emerald-700 transition duration-300"
+        disabled={loading}
+        className="w-full py-3.5 px-4 cursor-pointer bg-gradient-to-r from-teal-400 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:from-teal-500 hover:to-teal-600 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
-        Sign In
+        {loading ? "Signing in..." : "Sign In"}
       </button>
-      <p className="text-center text-sm text-gray-500">
-        Forgot password?{" "}
-        <a
-          href="#"
-          className="font-medium text-emerald-600 hover:text-emerald-500"
+
+      <p className="text-center text-sm text-gray-400">
+        Don't have an account?{" "}
+        <button
+          type="button"
+          onClick={() => setActiveTab("register")}
+          className="font-medium cursor-pointer text-teal-500 hover:text-teal-400 transition-colors"
         >
-          Reset it
-        </a>
+          Sign up
+        </button>
       </p>
     </form>
   );
 
   const RegisterForm = (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-      <div className="space-y-4">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
+        <p className="text-gray-400">Join and start chatting today</p>
+      </div>
+
+      <div className="space-y-5">
         <div>
           <label
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-300 mb-2"
             htmlFor="reg_email"
           >
             Email Address
           </label>
           <input
-            id="email"
+            id="reg_email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition duration-150"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-[#2a2b33] border border-[#3d3e47] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all disabled:opacity-50"
             placeholder="you@example.com"
           />
         </div>
+
         <div>
           <label
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-300 mb-2"
             htmlFor="reg_password"
           >
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition duration-150"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              id="reg_password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-3 bg-[#2a2b33] border border-[#3d3e47] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all disabled:opacity-50 pr-12"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
+          {/* Password Strength Indicator */}
+          {password && (
+            <div className="mt-2 space-y-1">
+              <div className="h-1.5 bg-[#2a2b33] rounded-full overflow-hidden">
+                <div
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${passwordStrength.strength}%`,
+                    backgroundColor: passwordStrength.color,
+                  }}
+                />
+              </div>
+              <p className="text-xs" style={{ color: passwordStrength.color }}>
+                {passwordStrength.label}
+              </p>
+            </div>
+          )}
+
+          <p className="mt-2 text-xs text-gray-400">
+            Must contain 8+ characters, uppercase, lowercase, number & special
+            character
+          </p>
         </div>
+
         <div>
           <label
-            className="block text-sm font-medium text-gray-700 mb-1"
-            htmlFor="reg_password"
+            className="block text-sm font-medium text-gray-300 mb-2"
+            htmlFor="confirm_password"
           >
             Confirm Password
           </label>
-          <input
-            id="confirmpassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 transition duration-150"
-            placeholder="••••••••"
-          />
+          <div className="relative">
+            <input
+              id="confirm_password"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-3 bg-[#2a2b33] border border-[#3d3e47] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all disabled:opacity-50 pr-12"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
         </div>
       </div>
+
       <button
         type="submit"
-        className="w-full py-3 px-4 bg-green-600 text-white font-semibold rounded-xl shadow-lg hover:bg-green-700 transition duration-300"
+        disabled={loading}
+        className="w-full py-3.5 px-4 cursor-pointer bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:from-teal-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
-        Create Account
+        {loading ? "Creating account..." : "Create Account"}
       </button>
+
+      <p className="text-center text-sm text-gray-400">
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={() => setActiveTab("login")}
+          className="font-medium cursor-pointer text-teal-500 hover:text-teal-400 transition-colors"
+        >
+          Sign in
+        </button>
+      </p>
     </form>
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-inter">
-      <style>{`
-        /* Import Inter font (for the 'font-inter' utility) */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        .font-inter {
-            font-family: 'Inter', sans-serif;
-        }
-      `}</style>
+    <div className="min-h-screen bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-4 items-center">
+        {/* Left Side - Branding */}
+        <div className="hidden lg:flex flex-col items-center justify-center space-y-8 text-center">
+          <div className="relative">
+            <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full" />
+            <DotLottieReact
+              src="/src/assets/authChatbot.lottie"
+              loop
+              autoplay
+              style={{ width: 350, height: 350 }}
+            />
+          </div>
 
-      <div className="bg-white shadow-2xl rounded-3xl w-full max-w-6xl overflow-hidden grid xl:grid-cols-2">
-        {/* --- Left Side: Welcome & Animated SVG Panel (Hidden on Mobile) --- */}
-        <div
-          className="hidden xl:flex flex-col items-center justify-center p-12 
-                     bg-gradient-to-br from-emerald-700 to-teal-600 text-white relative 
-                     transition duration-500 ease-in-out space-y-6"
-        >
-          {/* Animated SVG Placeholder */}
-          {ThemedAnimatedSVG}
-
-          <div className="relative z-10 text-center">
-            <h1 className="text-5xl font-extrabold mb-3 flex items-center justify-center">
-              <Zap className="h-8 w-8 mr-2 text-emerald-300" />
+          <div className="space-y-4">
+            <h1 className="text-5xl font-semibold text-white flex items-center justify-center">
+              <Zap className="h-12 w-12 mr-2 text-teal-500" />
               Flash Chat
             </h1>
-            <p className="text-lg font-light max-w-xs opacity-90">
-              Securely connect and chat with the world, powered by Firebase.
+            <p className="text-xl text-gray-300 max-w-md">
+              Connect instantly with friends and colleagues in a secure
+              environment
             </p>
+          </div>
+
+          <div className="flex items-center gap-8 text-gray-400">
+            <div className="flex items-center gap-2">
+              <Shield size={20} className="text-teal-500" />
+              <span className="text-sm">End-to-End Encryption</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MessageCircle size={20} className="text-teal-500" />
+              <span className="text-sm">Real-time Messaging</span>
+            </div>
           </div>
         </div>
 
-        {/* --- Right Side: Auth Forms & Tabs --- */}
-        <div className="flex flex-col items-center justify-center p-8 md:p-12">
-          {/* Custom Tabs List */}
-          <div className="w-full max-w-sm mb-8">
-            <div className="flex border-b border-gray-200">
-              {/* Login Tab Trigger */}
+        {/* Right Side - Auth Forms */}
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-[#1c1d25] backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-[#2f303b]">
+            {/* Mobile Logo */}
+            <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+              <h1 className="text-4xl font-semibold text-white flex items-center justify-center">
+                <Zap className="h-10 w-10 mr-2 text-teal-500" />
+                Flash Chat
+              </h1>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mb-8 bg-[#2a2b33] p-1.5 rounded-xl">
               <button
                 onClick={() => setActiveTab("login")}
-                className={`flex-1 py-3 text-lg font-semibold border-b-2 transition-colors duration-300 ${
+                className={`flex-1 py-2.5 text-sm font-semibold cursor-pointer rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
                   activeTab === "login"
-                    ? "border-emerald-600 text-emerald-600" // Primary Green
-                    : "border-transparent text-gray-500 hover:text-emerald-600"
-                } flex items-center justify-center space-x-2`}
+                    ? "bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-lg"
+                    : "text-gray-400 hover:text-white"
+                }`}
               >
-                <LogIn className="w-5 h-5" />
+                <LogIn size={18} />
                 <span>Login</span>
               </button>
-              {/* Register Tab Trigger */}
               <button
                 onClick={() => setActiveTab("register")}
-                className={`flex-1 py-3 text-lg font-semibold border-b-2 transition-colors duration-300 ${
+                className={`flex-1 py-2.5 text-sm font-semibold cursor-pointer rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
                   activeTab === "register"
-                    ? "border-green-600 text-green-600" // Accent Green
-                    : "border-transparent text-gray-500 hover:text-green-600"
-                } flex items-center justify-center space-x-2`}
+                    ? "bg-gradient-to-r from-teal-700 to-teal-600 text-white shadow-lg"
+                    : "text-gray-400 hover:text-white"
+                }`}
               >
-                <UserPlus className="w-5 h-5" />
+                <UserPlus size={18} />
                 <span>Register</span>
               </button>
             </div>
-          </div>
 
-          {/* Tabs Content */}
-          <div className="w-full max-w-sm">
+            {/* Forms */}
             {activeTab === "login" ? LoginForm : RegisterForm}
           </div>
         </div>

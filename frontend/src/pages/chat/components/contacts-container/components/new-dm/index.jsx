@@ -45,7 +45,6 @@ function NewDM() {
     }
   };
 
-  // ✅ Contact select karne par chat open ho
   const handleSelectContact = (contact) => {
     setOpenNewModal(false);
     setSelectedChatType("contact");
@@ -70,7 +69,6 @@ function NewDM() {
 
       <Dialog open={openNewModal} onOpenChange={setOpenNewModal}>
         <DialogContent className="bg-[#1b1c24] border-2 border-[#2f303b] text-white max-w-[95vw] sm:max-w-md rounded-2xl p-0 overflow-hidden">
-          {/* Header */}
           <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 bg-gradient-to-r from-[#1e1f28] to-[#1b1c24] border-b border-[#2f303b]">
             <DialogTitle className="text-lg sm:text-xl font-bold text-white text-start">
               New Message
@@ -80,7 +78,6 @@ function NewDM() {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Search Input */}
           <div className="px-4 sm:px-6 py-3 sm:py-4 bg-[#1b1c24]">
             <div className="relative">
               <Search
@@ -95,7 +92,6 @@ function NewDM() {
             </div>
           </div>
 
-          {/* Contacts List */}
           <ScrollArea className="h-[60vh] sm:h-[400px] px-4 sm:px-6 pb-4 sm:pb-6">
             <div className="space-y-2">
               {searchedContacts.length > 0 ? (
@@ -105,7 +101,6 @@ function NewDM() {
                     onClick={() => handleSelectContact(contact)}
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#2a2b33] cursor-pointer transition-all duration-200 group"
                   >
-                    {/* Avatar */}
                     <div className="relative">
                       <Avatar className="w-12 h-12 ring-2 ring-[#2f303b] group-hover:ring-teal-500 transition-all">
                         {contact.picture ? (
@@ -127,7 +122,6 @@ function NewDM() {
                       </Avatar>
                     </div>
 
-                    {/* Contact Info */}
                     <div className="flex-1 min-w-0 max-w-[200px] md:max-w-[260px] overflow-hidden">
                       <p className="text-white font-semibold text-sm truncate">
                         {contact.firstName && contact.lastName
@@ -139,7 +133,6 @@ function NewDM() {
                       </p>
                     </div>
 
-                    {/* Arrow Icon on Hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center">
                         <Plus size={16} className="text-white" />

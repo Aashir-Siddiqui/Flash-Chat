@@ -1,11 +1,11 @@
-import { Server as SocketIoServer } from "socket.io"; // ✅ Fixed typo: SockerIoServer -> SocketIoServer
+import { Server as SocketIoServer } from "socket.io";
 import Message from "./models/messageModel.js";
+import Channel from "./models/channelModel.js";
 
 const setupSocket = (server) => {
-  // ✅ Fixed typo: setupScoket -> setupSocket
   const io = new SocketIoServer(server, {
     cors: {
-      origin: process.env.ORIGIN, // ✅ Fixed typo: OTIGIN -> ORIGIN
+      origin: process.env.ORIGIN,
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -42,20 +42,67 @@ const setupSocket = (server) => {
     }
   };
 
+  const channelMessage = async (message) => {
+    const { channelId, sender, content, messageType, fileUrl } = message;
+
+    const createdMessage = await Message.create({
+      sender,
+      recipient: null,
+      content,
+      messageType,
+      timestamp: new Date(),
+      fileUrl,
+    });
+
+    const messageData = await Message.findById(createdMessage._id)
+      .populate("sender", "id email firstName lastName picture color")
+      .exec();
+
+    await Channel.findByIdAndUpdate(channelId, {
+      $push: { messages: createdMessage._id },
+    });
+
+    const channel = await Channel.findById(channelId).populate("members");
+
+    const finalData = { ...messageData._doc, channelId: channel._id };
+
+    console.log("Final Channel Message Data:", finalData);
+
+    if (channel && channel.members) {
+      channel.members.forEach((member) => {
+        const memberSocketId = userSocketMap.get(member._id.toString());
+        if (memberSocketId) {
+          io.to(memberSocketId).emit("recieve-channel-message", finalData);
+        }
+      });
+
+      const adminIds = Array.isArray(channel.admin)
+        ? channel.admin
+        : [channel.admin];
+
+      adminIds.forEach((adminId) => {
+        const adminSocketId = userSocketMap.get(adminId.toString());
+        if (adminSocketId) {
+          io.to(adminSocketId).emit("recieve-channel-message", finalData);
+        }
+      });
+    }
+  };
+
   io.on("connection", (socket) => {
-    // ✅ Fixed typo: connections -> connection
     const userId = socket.handshake.query.userId;
 
     if (userId) {
       userSocketMap.set(userId, socket.id);
       console.log(`User Connected: ${userId} with Socket Id ${socket.id}`);
     } else {
-      console.log("No User ID provided during connection"); // ✅ Fixed message
+      console.log("No User ID provided during connection");
     }
 
     socket.on("sendMessage", sendMessage);
+    socket.on("send-channel-message", channelMessage);
     socket.on("disconnect", () => disconnect(socket));
   });
 };
 
-export default setupSocket; // ✅ Fixed export name
+export default setupSocket;

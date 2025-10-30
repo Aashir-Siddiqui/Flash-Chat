@@ -39,18 +39,20 @@ function MessageBar() {
   const handleSend = async () => {
     if (message.trim() && socket) {
       if (selectedChatType === "contact") {
-        console.log("Sending message:", {
-          sender: userInfo.id,
-          recipient: selectedChatData._id,
-          content: message,
-        });
-
         socket.emit("sendMessage", {
           sender: userInfo.id,
           content: message,
           recipient: selectedChatData._id,
           messageType: "text",
           fileUrl: undefined,
+        });
+      } else if (selectedChatType === "channel") {
+        socket.emit("send-channel-message", {
+          sender: userInfo.id,
+          content: message,
+          messageType: "text",
+          fileUrl: undefined,
+          channelId: selectedChatData._id,
         });
       }
       setMessage("");
@@ -95,6 +97,14 @@ function MessageBar() {
               messageType: "file",
               fileUrl: response.data.filePath,
             });
+          } else if (selectedChatType === "channel") {
+            socket.emit("send-channel-message", {
+              sender: userInfo.id,
+              content: undefined,
+              messageType: "file",
+              fileUrl: response.data.filePath,
+              channelId: selectedChatData._id,
+            });
           }
         }
       }
@@ -109,7 +119,7 @@ function MessageBar() {
       <Button
         variant="ghost"
         size="icon"
-        className="text-gray-400 hover:text-teal-400 hover:bg-[#2f303b] rounded-full flex-shrink-0"
+        className="text-gray-400 cursor-pointer hover:text-teal-400 hover:bg-[#2f303b] rounded-full flex-shrink-0"
         onClick={handleAttachmentClick}
       >
         <input
@@ -134,7 +144,7 @@ function MessageBar() {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-400 hover:bg-transparent rounded-full"
+          className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-yellow-400 hover:bg-transparent rounded-full"
           onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}
         >
           <Smile size={20} />
@@ -183,7 +193,7 @@ function MessageBar() {
       <Button
         onClick={handleSend}
         disabled={!message.trim()}
-        className="bg-teal-500 hover:bg-teal-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-full w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 shadow-lg transition-all"
+        className="bg-teal-500 hover:bg-teal-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-full w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 shadow-lg transition-all cursor-pointer"
       >
         <Send size={18} className="sm:w-[20px] sm:h-[20px]" />
       </Button>

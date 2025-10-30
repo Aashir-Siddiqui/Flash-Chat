@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
-import Message from "../models/messageModel.js"; // ✅ Import Message model
+import Message from "../models/messageModel.js";
 
 export const searchContacts = async (req, res, next) => {
   try {
@@ -36,7 +36,6 @@ export const getContactsForDmLists = async (req, res, next) => {
     let { userId } = req;
     userId = new mongoose.Types.ObjectId(userId);
 
-    // ✅ Fixed: Use Message.aggregate() not mongoose.Aggregate()
     const contacts = await Message.aggregate([
       {
         $match: {
@@ -44,13 +43,13 @@ export const getContactsForDmLists = async (req, res, next) => {
         },
       },
       {
-        $sort: { timestamp: -1 }, // ✅ Fixed: timestamp not lastMessageTime
+        $sort: { timestamp: -1 },
       },
       {
         $group: {
           _id: {
             $cond: {
-              if: { $eq: ["$sender", userId] }, // ✅ Fixed: Added quotes to $sender
+              if: { $eq: ["$sender", userId] },
               then: "$recipient",
               else: "$sender",
             },
@@ -60,7 +59,7 @@ export const getContactsForDmLists = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "users", // ✅ Collection name correct
+          from: "users",
           localField: "_id",
           foreignField: "_id",
           as: "contactInfo",
@@ -81,7 +80,7 @@ export const getContactsForDmLists = async (req, res, next) => {
         },
       },
       {
-        $sort: { lastMessageTime: -1 }, // ✅ Sort by most recent message
+        $sort: { lastMessageTime: -1 },
       },
     ]);
 
@@ -89,5 +88,29 @@ export const getContactsForDmLists = async (req, res, next) => {
   } catch (error) {
     console.error("Get contacts for DM error:", error);
     return res.status(500).send("Internal server error.");
+  }
+};
+
+export const getAllContacts = async (req, res, next) => {
+  try {
+    const users = await User.find({
+      _id: { $ne: req.userId },
+    }).select("firstName lastName email");
+
+    const contacts = users.map((user) => ({
+      label:
+        user.firstName && user.lastName
+          ? `${user.firstName} ${user.lastName}`
+          : user.email,
+      value: user._id.toString(),
+    }));
+
+    return res.status(200).json({ contacts });
+  } catch (error) {
+    console.error("Get all contacts error:", error.message);
+    return res.status(500).json({
+      error: "Internal server error.",
+      details: error.message,
+    });
   }
 };

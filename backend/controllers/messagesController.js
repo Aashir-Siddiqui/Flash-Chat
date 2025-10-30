@@ -34,17 +34,13 @@ export const uploadFile = async (req, res, next) => {
     }
 
     const date = Date.now();
-    // FIX 1: Add forward slash in path
     const fileDir = `uploads/files/${date}`;
     const fileName = `${fileDir}/${req.file.originalname}`;
 
-    // Create directory if it doesn't exist
     mkdirSync(fileDir, { recursive: true });
 
-    // Move file from temp to permanent location
     renameSync(req.file.path, fileName);
 
-    // FIX 2: Return correct filePath (without uploads/ prefix since static middleware handles it)
     return res.status(200).json({ filePath: fileName });
   } catch (error) {
     console.error("Error uploading file:", error);

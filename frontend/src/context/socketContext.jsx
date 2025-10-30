@@ -20,17 +20,14 @@ export const SocketProvider = ({ children }) => {
         query: { userId: userInfo.id },
       });
 
-      socket.current.on("connect", () => {
-        console.log("Connected to socket server");
-      });
+      // socket.current.on("connect", () => {
+      //   console.log("Connected to socket server");
+      // });
 
       const handleReceiveMessage = (message) => {
-        console.log("Message received on frontend:", message);
-
         const { selectedChatData, selectedChatType, addMessage } =
           useAppStore.getState();
 
-        // FIX: Better condition check
         if (
           selectedChatType !== undefined &&
           selectedChatData &&
@@ -44,8 +41,20 @@ export const SocketProvider = ({ children }) => {
         }
       };
 
-      // FIX: Correct event name (receiveMessage)
+      const handleReiveChannelMessage = (message) => {
+        const { selectedChatData, selectedChatType, addMessage } =
+          useAppStore.getState();
+
+        if (
+          selectedChatType !== undefined &&
+          selectedChatData._id === message.channelId
+        ) {
+          addMessage(message);
+        }
+      };
+
       socket.current.on("recieveMessage", handleReceiveMessage);
+      socket.current.on("recieve-channel-message", handleReiveChannelMessage);
 
       const handleDisconnect = () => {
         if (socket.current) {
